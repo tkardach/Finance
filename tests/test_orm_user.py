@@ -1,4 +1,5 @@
 import unittest
+import tests
 from finance.database.database import engine, SessionLocal
 from finance.utility.security import *
 from finance.database.models import User

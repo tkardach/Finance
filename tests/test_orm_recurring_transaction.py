@@ -3,11 +3,11 @@ import tests
 from finance.database.account import *
 from finance.database.user import *
 from finance.database.transactions import *
-from finance.database.models import Account, User, SingleTransaction
+from finance.database.models import Account, User, RecurringTransaction
 from finance.database.database import engine, SessionLocal
 from datetime import date, timedelta
 
-class TestORMSingleTransactions(unittest.TestCase):
+class TestORMRecurringTransactions(unittest.TestCase):
     session = None
     #User info
     test_email = 'test@email.com'
@@ -30,9 +30,10 @@ class TestORMSingleTransactions(unittest.TestCase):
     test_date_2 = date.today() + timedelta(days=2)
     test_amount_1 = 500
     test_amount_2 = -200
+    biweekly = Timespan(0, 2, 0, 0)
 
     def delete_all_rows(self):
-        self.session.query(SingleTransaction).delete()
+        self.session.query(RecurringTransaction).delete()
         self.session.query(Account).delete()
         self.session.query(User).delete()
         self.session.commit()
@@ -55,13 +56,14 @@ class TestORMSingleTransactions(unittest.TestCase):
         self.session.close()
 
 
-    def test_create_single_transaction(self):
+    def test_create_recurring_transaction(self):
         raises = False
         try:
-            trans = create_single_transaction(
+            trans = create_recurring_transaction(
                 account=self.test_account_1,
                 name=self.test_transaction_1,
-                date=self.test_date_1,
+                start_date=self.test_date_1,
+                timespan=self.biweekly,
                 amount=self.test_amount_1
             )
             self.session.commit()
@@ -69,41 +71,44 @@ class TestORMSingleTransactions(unittest.TestCase):
             raises = True
 
         self.assertFalse(raises)
-        self.assertEqual(len(self.session.query(SingleTransaction).all()), 1)
-        self.assertEqual(self.test_account_1.single_transactions.count(), 1)
-        self.assertEqual(self.test_account_2.single_transactions.count(), 0)
+        self.assertEqual(len(self.session.query(RecurringTransaction).all()), 1)
+        self.assertEqual(self.test_account_1.recurring_transactions.count(), 1)
+        self.assertEqual(self.test_account_2.recurring_transactions.count(), 0)
+        self.assertEqual(self.test_account_1.recurring_transactions.first(), trans)
         self.assertEqual(trans.account, self.test_account_1)
         self.assertEqual(trans.name, self.test_transaction_1)
-        self.assertEqual(trans.date.date(), self.test_date_1)
+        self.assertEqual(trans.start_date.date(), self.test_date_1)
+        self.assertEqual(trans.timespan, self.biweekly.to_timespan_str())
         self.assertEqual(trans.amount, self.test_amount_1)
-        self.assertEqual(self.test_account_1.single_transactions[0], trans)
 
 
-    def test_get_all_single_transactions_on_date(self):
+    def test_get_all_recurring_transactions_on_date(self):
         raises = False
         try:
-            create_single_transaction(
+            create_recurring_transaction(
                 account=self.test_account_1,
                 name=self.test_transaction_1,
-                date=self.test_date_1,
+                start_date=self.test_date_1,
+                timespan=self.biweekly,
                 amount=self.test_amount_1
             )
-            create_single_transaction(
+            create_recurring_transaction(
                 account=self.test_account_1,
                 name=self.test_transaction_1,
-                date=self.test_date_2,
+                start_date=self.test_date_2,
+                timespan=self.biweekly,
                 amount=self.test_amount_2
             )
             self.session.commit()
-            transactions_1 = get_all_single_transactions_on_date(
+            transactions_1 = get_all_recurring_transactions_on_date(
                 self.test_account_1,
                 self.test_date_1
             )
-            transactions_2 = get_all_single_transactions_on_date(
+            transactions_2 = get_all_recurring_transactions_on_date(
                 self.test_account_1,
                 self.test_date_2
             )
-            transactions_3 = get_all_single_transactions_on_date(
+            transactions_3 = get_all_recurring_transactions_on_date(
                 self.test_account_2,
                 self.test_date_2
             )
@@ -111,48 +116,8 @@ class TestORMSingleTransactions(unittest.TestCase):
             raises = True
             
         self.assertFalse(raises)
-        self.assertEqual(self.test_account_1.single_transactions.count(), 2)
+        self.assertEqual(self.test_account_1.recurring_transactions.count(), 2)
         self.assertEqual(len(transactions_1), 1)
         self.assertEqual(len(transactions_2), 2)
         self.assertEqual(len(transactions_3), 0)
 
-
-    def test_get_single_transaction_sum_on_date(self):
-        raises = False
-        try:
-            create_single_transaction(
-                account=self.test_account_1,
-                name=self.test_transaction_1,
-                date=self.test_date_1,
-                amount=self.test_amount_1
-            )
-            create_single_transaction(
-                account=self.test_account_1,
-                name=self.test_transaction_1,
-                date=self.test_date_2,
-                amount=self.test_amount_2
-            )
-            self.session.commit()
-            sum_1 = get_single_transaction_sum_on_date(
-                self.test_account_1,
-                self.test_date_1
-            )
-            sum_2 = get_single_transaction_sum_on_date(
-                self.test_account_1,
-                self.test_date_2
-            )
-            sum_3 = get_single_transaction_sum_on_date(
-                self.test_account_2,
-                self.test_date_1
-            )
-            expected_sum_1 = self.test_amount_1
-            expected_sum_2 = self.test_amount_1 + self.test_amount_2
-            expected_sum_3 = 0
-        except:
-            raises = True
-            
-        self.assertFalse(raises)
-        self.assertEqual(self.test_account_1.single_transactions.count(), 2)
-        self.assertEqual(sum_1, expected_sum_1)
-        self.assertEqual(sum_2, expected_sum_2)
-        self.assertEqual(sum_3, expected_sum_3)

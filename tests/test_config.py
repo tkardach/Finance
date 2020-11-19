@@ -1,4 +1,5 @@
 import unittest
+import tests
 from finance.utility.config import Config, TEST_VAR
 
 class TestConfigurationFile(unittest.TestCase):

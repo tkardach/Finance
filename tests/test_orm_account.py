@@ -1,8 +1,9 @@
+import unittest
+import tests
 from finance.database.database import engine, SessionLocal
 from finance.database.models import Account, User
 from finance.database.user import *
 from finance.database.account import *
-import unittest
 
 
 class TestORMAccount(unittest.TestCase):

@@ -1,4 +1,5 @@
 import unittest
+import tests
 import finance.utility.security as sec
 
 class TestHash(unittest.TestCase):

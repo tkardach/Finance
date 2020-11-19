@@ -34,7 +34,7 @@ class User(Base):
         nullable=False)
     password = Column(VARCHAR(255))
 
-    accounts = relationship("Account", back_populates="user")
+    accounts = relationship('Account', back_populates='user')
 
     def __repr__(self):
         return "<User(email='%s', is_admin='%s')>" % (self.email, self.is_admin)
@@ -62,9 +62,13 @@ class Account(Base):
         nullable=False
     )
 
-    user = relationship("User", back_populates="accounts")
-    recurring_transactions = relationship("RecurringTransaction", back_populates="account")
-    single_transactions = relationship("SingleTransaction", back_populates="account")
+    user = relationship('User', back_populates='accounts')
+    recurring_transactions = relationship('RecurringTransaction', 
+        back_populates='account',
+        lazy='dynamic')
+    single_transactions = relationship('SingleTransaction', 
+        back_populates='account',
+        lazy='dynamic')
 
     __table_args__ = (Index('account_index', 'name', 'user_id'),)
 
@@ -102,7 +106,7 @@ class RecurringTransaction(Base):
         nullable=False
     )
 
-    account = relationship("Account", back_populates="recurring_transactions")
+    account = relationship('Account', back_populates='recurring_transactions')
 
 
 class SingleTransaction(Base):
@@ -131,4 +135,7 @@ class SingleTransaction(Base):
         nullable=False
     )
 
-    account = relationship("Account", back_populates="single_transactions")
+    account = relationship('Account', back_populates='single_transactions')
+
+    def __repr__(self):
+        return "<SingleTransaction(name='%s', date='%s', amount='%s')>" % (self.name, self.date, self.amount)

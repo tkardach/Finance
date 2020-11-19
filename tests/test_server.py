@@ -1,4 +1,5 @@
 import unittest
+import tests
 from finance.server.server import app
 
 class TestServer(unittest.TestCase):
