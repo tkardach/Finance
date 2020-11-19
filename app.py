@@ -1,6 +1,5 @@
-from configparser import ConfigParser
-import os
+from finance.utility.config import Config
 
-parser = ConfigParser(os.environ)
-parser.read('config.ini')
-print(parser['DEFAULT']['db_user'])
+
+if __name__ == "__main__":
+  app.run(debug=Config.test_env)

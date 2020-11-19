@@ -5,10 +5,15 @@ verify_ssl = true
 
 [dev-packages]
 pylint = "*"
+autopep8 = "*"
 
 [packages]
 mysql-connector-python = "*"
 python-dateutil = "*"
+flask = "*"
+flask-login = "*"
+py-bcrypt = "*"
+sqlalchemy = "*"
 
 [requires]
 python_version = "3.8"

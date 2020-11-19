@@ -1,10 +1,5 @@
-import os
-
-# Setup env variables used in testing
-os.environ['TEST_FLAG'] = 'True'
-
 import unittest
-from finance.config import Config, TEST_VAR
+from finance.utility.config import Config, TEST_VAR
 
 class TestConfigurationFile(unittest.TestCase):
 

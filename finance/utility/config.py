@@ -15,7 +15,7 @@ class EnvInterpolation(BasicInterpolation):
         return os.path.expandvars(value)
 
 parser = ConfigParser(interpolation=EnvInterpolation())
-parser.read('finance/config.ini')
+parser.read('finance/utility/config.ini')
 
 # Config class contains static properties describing system configuration settings
 class Config():
@@ -25,3 +25,4 @@ class Config():
   db_pass = parser.get(SECTION, 'db_pass')
   db_host = parser.get(SECTION, 'db_host')
   db_name = parser.get(SECTION, 'db_name')
+  secret_key = parser.get('shared', 'secret_key')

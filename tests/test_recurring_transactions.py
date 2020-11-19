@@ -6,11 +6,11 @@ os.environ['TEST_FLAG'] = 'True'
 import unittest
 from datetime import date, timedelta
 from mysql.connector import errorcode
-from finance.config import Config
-from finance.mysql import *
-from finance.profile import *
-from finance.account import *
-from finance.transactions import *
+from finance.utility.config import Config
+from finance.database.mysql import *
+from finance.database.profile import *
+from finance.database.account import *
+from finance.database.transactions import *
 from finance.shared import *
 
 class TestAccount(unittest.TestCase):
@@ -177,4 +177,25 @@ class TestAccount(unittest.TestCase):
       self.test_account_id,
       date.today() + timedelta(days=32))
     self.assertEqual(amount, trans * 2 + new_amount)
+
+  
+  def test_get_account_balance_for_date_by_id(self):
+    biweekly = Timespan(0, 2, 0, 0)
+    trans = 100
+    create_recurring_transaction(
+      self.test_account_id,
+      self.test_trans_name,
+      date.today(),
+      biweekly,
+      trans)
+
+    amount = get_recurring_transaction_sum_from_date(
+      self.test_account_id,
+      date.today() + timedelta(days=28))
+    self.assertEqual(amount, trans * 2)
+
+    amount = get_recurring_transaction_sum_from_date(
+      self.test_account_id,
+      date.today() + timedelta(days=32))
+    self.assertEqual(amount, trans * 2)
     

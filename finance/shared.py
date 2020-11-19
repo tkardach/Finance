@@ -3,12 +3,6 @@ from enum import Enum
 from datetime import date, timedelta
 
 
-class ErrorCode(Enum):
-  MYSQL_ACCESS_DENIED = 0
-  MYSQL_DB_DNE = 1
-  MYSQL_UNKNOWN_ERROR = 2
-
-
 def date_to_mysql_str(date: date) -> str:
   return date.strftime("%Y-%m-%d")
 

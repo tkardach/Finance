@@ -1,0 +1,1 @@
+Financing back-end server written in Python, using MySQL database

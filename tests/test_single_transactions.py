@@ -6,11 +6,11 @@ os.environ['TEST_FLAG'] = 'True'
 import unittest
 from datetime import date, timedelta
 from mysql.connector import errorcode
-from finance.config import Config
-from finance.mysql import *
-from finance.profile import *
-from finance.account import *
-from finance.transactions import *
+from finance.utility.config import Config
+from finance.database.mysql import *
+from finance.database.profile import *
+from finance.database.account import *
+from finance.database.transactions import *
 
 class TestAccount(unittest.TestCase):
   test_email = 'test@email.com'

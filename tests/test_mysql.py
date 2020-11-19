@@ -4,8 +4,9 @@ import os
 os.environ['TEST_FLAG'] = 'True'
 
 import unittest
-from finance.config import Config
-from finance.mysql import *
+import sqlalchemy as db
+from finance.utility.config import Config
+from finance.database.mysql import *
 
 class TestMySQL(unittest.TestCase):
     def setUp(self):
@@ -23,3 +24,26 @@ class TestMySQL(unittest.TestCase):
       else:
         cnx.close()
       self.assertFalse(raises)
+    
+
+    def test_mysql_get_engine(self):
+      raises = False
+      try:
+        engine = get_engine()
+      except:
+        raises = True
+      self.assertFalse(raises)
+      
+
+    def test_mysql_connect_engine(self):
+      engine = get_engine()
+      with engine.connect() as connection:
+        self.assertIsNotNone(connection)
+
+
+    def test_mysql_db_other(self):
+      engine = get_engine()
+      with engine.connect() as connection:
+        metadata = db.MetaData()
+        census = db.Table('single_transaction', metadata, autoload=True, autoload_with=engine)
+        print(census.columns.keys())
