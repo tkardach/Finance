@@ -91,7 +91,7 @@ def get_single_transaction_sum_on_date(
     ).scalar()
     if result is None:
         return 0
-    return float(result)
+    return round(float(result), 2)
 
 
 # endregion
@@ -182,45 +182,38 @@ def get_recurring_transaction_sum_on_date(
       The total of all recurring transactions up to the date
     """
     transactions = get_all_recurring_transactions_on_date(account, date)
+    
+    transaction_sum = 0
+    for transaction in transactions:
+        timespan = Timespan.get_timespan(transaction.timespan)
+        start_date = transaction.start_date.date()
+        amount = float(transaction.amount)
+
+        # continue itterating through timespans to see how many 
+        # recurring transactions occurred
+        num_of_timespans = 1
+        while start_date < date:
+            start_date = start_date + relativedelta(
+              years=+timespan.years,
+              months=+timespan.months,
+              weeks=+timespan.weeks,
+              days=+timespan.days)
+            if start_date <= date:
+                num_of_timespans = num_of_timespans + 1
+
+        transaction_sum = transaction_sum + (num_of_timespans * amount)
+
+    return round(transaction_sum, 2)
 
 
 # endregion
 
-def get_account_balance_for_date(
-        profile_id: int,
-        account_name: str,
-        date: date) -> float:
-    """Get the account balance on a given date
 
-    Parameters
-    ----------
-    profile_id: int
-      ID of the profile being checked
-
-    account_name: str
-      Name of the account being checked
-
-    Returns
-    -------
-    float
-      Sum of all transactions and initial account balance on the given date
-
-    Raises
-    ------
-    mysql.connector.Error
-      If the connection was unsuccessful; if the query was unsuccessful
-    """
-    account_id = get_account_id(
-        name=account_name,
-        profile_id=profile_id)
-
-    return get_account_balance_for_date_by_id(
-        account_id,
-        date)
+# region Account Calculations
 
 
-def get_account_balance_for_date_by_id(
-        account_id: int,
+def get_account_balance_on_date(
+        account: Account,
         date: date) -> float:
     """Get the account balance on a given date
 
@@ -239,15 +232,18 @@ def get_account_balance_for_date_by_id(
     mysql.connector.Error
       If the connection was unsuccessful; if the query was unsuccessful
     """
-    balance = get_account_balance(account_id)
-    single_amount = get_single_transaction_sum_from_date(
-        account_id,
+    balance = float(account.balance)
+    single_amount = get_single_transaction_sum_on_date(
+        account,
         date
     )
 
-    recurring_amount = get_recurring_transaction_sum_from_date(
-        account_id,
+    recurring_amount = get_recurring_transaction_sum_on_date(
+        account,
         date
     )
 
-    return balance + single_amount + recurring_amount
+    return round(balance + single_amount + recurring_amount, 2)
+
+
+# endregion

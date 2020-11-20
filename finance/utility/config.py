@@ -20,7 +20,7 @@ parser.read('finance/utility/config.ini')
 # Config class contains static properties describing system configuration settings
 class Config():
   test_env = SECTION == 'test'
-  test_var = parser.get(SECTION, 'test_var')
+  test_var = parser.get(SECTION, 'test_var') if test_env else None
   db_user = parser.get(SECTION, 'db_user')
   db_pass = parser.get(SECTION, 'db_pass')
   db_host = parser.get(SECTION, 'db_host')
