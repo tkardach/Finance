@@ -1,7 +1,8 @@
 from .database import Base
-import finance.utility.security as sec
+from flask_login import UserMixin
 from sqlalchemy import Column, INT, VARCHAR, BOOLEAN, DECIMAL, ForeignKey, DATETIME, Index
 from sqlalchemy.orm import relationship
+import finance.utility.security as sec
 import uuid
 
 
@@ -9,7 +10,7 @@ def generate_uuid():
    return str(uuid.uuid4())
 
 
-class User(Base):
+class User(UserMixin, Base):
     __tablename__ = 'users'
 
     def __init__(self, email, password, is_admin):
@@ -17,6 +18,8 @@ class User(Base):
         self.password = sec.get_hashed_string(password)
         self.is_admin = is_admin
 
+    def get_id(self):
+        return self.user_id
 
     user_id = Column(
         VARCHAR(36),

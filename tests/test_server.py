@@ -1,6 +1,6 @@
 import unittest
 import tests
-from finance.server.server import app
+from finance.server import app
 
 class TestServer(unittest.TestCase):
   def setUp(self):
@@ -10,7 +10,4 @@ class TestServer(unittest.TestCase):
     pass
 
   def test_login_path(self):
-    response = self.client.post(
-      '/login',
-      data=
-    )
+    pass

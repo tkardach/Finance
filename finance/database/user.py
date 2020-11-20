@@ -76,7 +76,7 @@ def get_user_by_email(session: SessionLocal, email: str) -> User:
     return session.query(User).filter(User.email == email).scalar()
 
 
-def get_user_by_id(session: SessionLocal, user_id: int) -> User:
+def get_user_by_id(session: SessionLocal, user_id: str) -> User:
     """Get the user given the user ID
 
     Parameters
@@ -84,7 +84,7 @@ def get_user_by_id(session: SessionLocal, user_id: int) -> User:
     session: SessionLocal
       The current database session
 
-    user_id: int
+    user_id: str
       The id of the desired User
 
     Returns
