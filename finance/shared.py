@@ -140,6 +140,16 @@ class HTTPErrorResponse():
         }
         return HTTPResponse.return_json_response(ret, 400)
 
+    
+    @staticmethod
+    def internal_server_error(message: str = 'An unknown internal server error ocurred'):
+        ret = {
+          'error': 'Internal Server Error',
+          'message': '%s' % message
+        }
+        return HTTPResponse.return_json_response(ret, 500)
+
+
 
 class HTTPResponse():
     __json_mime_type = 'application/json'

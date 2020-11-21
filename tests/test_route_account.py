@@ -16,7 +16,7 @@ class TestRouteAccount(unittest.TestCase):
 
     def create_account(self, name: str, balance: float):
         account = create_account(
-            self.session, name=name, user=self.test_user, balance=balance)
+            name=name, user=self.test_user, balance=balance)
         self.session.commit()
 
     def create_test_user(self):
@@ -26,6 +26,16 @@ class TestRouteAccount(unittest.TestCase):
 
     def get_accounts(self):
         return self.client.get('/accounts')
+
+    def post_create_account(self, name, balance):
+        data = {
+            'name': name,
+            'balance': balance
+        }
+        return self.client.post(
+            '/create-account',
+            data=json.dumps(data),
+            mimetype='application/json')
 
     def post_login(self, email: str, password: str):
         test_login = {
@@ -67,6 +77,25 @@ class TestRouteAccount(unittest.TestCase):
         account_name = 'test_account'
         balance = 95.50
         self.create_account(account_name, balance)
+
+        response = self.get_accounts()
+
+        accounts = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(accounts), 1)
+
+    def test_create_account(self):
+        account_name = 'test_account'
+        balance = 95.50
+
+        response = self.post_create_account(account_name, balance)
+
+        self.assertEqual(response.status_code, 200)
+
+        account = json.loads(response.data)
+        self.assertEqual(account['name'], account_name)
+        self.assertEqual(account['balance'], balance)
+
         response = self.get_accounts()
 
         accounts = json.loads(response.data)
