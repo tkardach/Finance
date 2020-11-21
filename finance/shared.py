@@ -1,5 +1,6 @@
 import re
 import json
+from typing import Union
 from datetime import date, timedelta
 from flask import Response
 
@@ -144,5 +145,5 @@ class HTTPResponse():
     __json_mime_type = 'application/json'
 
     @staticmethod
-    def return_json_response(json_obj: dict, status: int):
+    def return_json_response(json_obj: Union[dict, list], status: int):
         return Response(json.dumps(json_obj), status=status, mimetype=HTTPResponse.__json_mime_type)

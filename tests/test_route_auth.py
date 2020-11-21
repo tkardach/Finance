@@ -7,7 +7,7 @@ from finance.database.user import create_user
 from finance.database.models import User
 
 
-class TestAuth(unittest.TestCase):
+class TestRouteAuth(unittest.TestCase):
     test_email = 'test@user.com'
     test_pass = 'test_password'
     test_user = None

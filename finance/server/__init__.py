@@ -19,6 +19,9 @@ app.register_blueprint(auth_blueprint)
 from .user import user as user_blueprint
 app.register_blueprint(user_blueprint)
 
+from .account import account as account_blueprint
+app.register_blueprint(account_blueprint)
+
 
 @login_manager.user_loader
 def load_user(user_id):
