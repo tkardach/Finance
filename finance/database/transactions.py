@@ -1,5 +1,5 @@
 from typing import List
-from finance.shared import *
+from finance.shared import Timespan
 from .models import Account, SingleTransaction, RecurringTransaction
 from .database import SessionLocal
 from sqlalchemy import func

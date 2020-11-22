@@ -39,7 +39,7 @@ LOGGING_CONFIG = {
     },
     'test': {
       'level': 'DEBUG',
-      'handlers': ['console'],
+      'handlers': [],
       'propogate': False
     }
   }

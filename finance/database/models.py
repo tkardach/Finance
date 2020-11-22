@@ -37,7 +37,9 @@ class User(UserMixin, Base):
         nullable=False)
     password = Column(VARCHAR(255))
 
-    accounts = relationship('Account', back_populates='user')
+    accounts = relationship('Account', 
+        back_populates='user',
+        lazy='dynamic')
 
     def __repr__(self):
         return "<User(email='%s', is_admin='%s')>" % (self.email, self.is_admin)

@@ -48,7 +48,7 @@ class TestORMAccount(unittest.TestCase):
         self.assertEqual(account.name, self.test_account_name)
         self.assertEqual(account.balance, self.test_balance)
         self.assertEqual(len(self.session.query(Account).all()), 1)
-        self.assertEqual(len(self.test_user.accounts), 1)
+        self.assertEqual(self.test_user.accounts.count(), 1)
         self.assertEqual(account, self.test_user.accounts[0])
 
 
@@ -69,3 +69,18 @@ class TestORMAccount(unittest.TestCase):
         self.assertEqual(len(accounts), 2)
         self.assertTrue(account1 in accounts)
         self.assertTrue(account2 in accounts)
+
+    def test_get_user_account_by_id(self):
+        raises = False
+        try:
+            account1 = create_account(
+                self.test_account_name, self.test_user, self.test_balance)
+            self.session.commit()
+
+            account = get_user_account_by_id(account1.account_id, self.test_user)
+        except:
+            self.session.rollback()
+            raises = True
+        self.assertFalse(raises)
+        self.assertEqual(account1, account)
+        

@@ -142,6 +142,15 @@ class HTTPErrorResponse():
 
     
     @staticmethod
+    def invalid_parameter(parameter: str, message: str = 'Parameter is invalid'):
+        ret = {
+          'error': '400 Invalid Parameter',
+          'message': '%s: %s' % (parameter, message)
+        }
+        return HTTPResponse.return_json_response(ret, 400)
+
+    
+    @staticmethod
     def unauthorized_user():
         ret = {
           'error': '401 Unauthorized',
@@ -159,6 +168,15 @@ class HTTPErrorResponse():
           'message': '%s' % message
         }
         return HTTPResponse.return_json_response(ret, 500)
+    
+
+    @staticmethod
+    def not_found(item: str):
+        ret = {
+          'error': '404 Not Found',
+          'message': '%s could not be found.' % item
+        }
+        return HTTPResponse.return_json_response(ret, 404)
 
 
 

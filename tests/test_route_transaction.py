@@ -7,12 +7,14 @@ from finance.server import app
 from finance.database.user import create_user
 from finance.database.account import create_account
 from finance.database.models import User, Account, SingleTransaction, RecurringTransaction
+from finance.database.transactions import create_single_transaction
+from dateutil import parser
 
 
 class TestRouteTransaction(unittest.TestCase):
     test_email = 'test@user.com'
     test_pass = 'test_password'
-    test_account = 'test_account'
+    test_account_name = 'test_account'
     test_account_id = None
     test_balance = 150.50
     test_user = None
@@ -23,10 +25,10 @@ class TestRouteTransaction(unittest.TestCase):
     test_trans_date = date.today()
 
     def create_account(self):
-        account = create_account(
-            name=self.test_account, user=self.test_user, balance=self.test_balance)
+        self.test_account = create_account(
+            name=self.test_account_name, user=self.test_user, balance=self.test_balance)
         self.session.commit()
-        self.test_account_id = account.account_id
+        self.test_account_id = self.test_account.account_id
 
     def create_test_user(self):
         self.test_user = create_user(
@@ -50,13 +52,17 @@ class TestRouteTransaction(unittest.TestCase):
         data = {
             'name': name,
             'amount': amount,
-            'date': date.strftime('%m/%d/%Y'),
+            'date': date.strftime('%m-%d-%Y'),
             'account_id': account_id
         }
         return self.client.post(
             '/single-transaction',
             data=json.dumps(data),
             mimetype='application/json')
+
+    def get_single_transaction(self):
+        return self.client.get('/single-transaction')
+
 
     def delete_all_rows(self):
         self.session.query(RecurringTransaction).delete()
@@ -81,7 +87,11 @@ class TestRouteTransaction(unittest.TestCase):
         response = self.post_create_single_transaction(
             self.test_trans_name, self.test_trans_amount, self.test_trans_date, self.test_account_id)
 
+        trans = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(trans['name'], self.test_trans_name)
+        self.assertEqual(trans['amount'], self.test_trans_amount)
+        self.assertEqual(parser.parse(trans['date']).date(), self.test_trans_date)
 
     def test_create_single_transaction_404_on_no_account(self):
         response = self.post_create_single_transaction(
@@ -95,3 +105,23 @@ class TestRouteTransaction(unittest.TestCase):
             self.test_trans_name, self.test_trans_amount, self.test_trans_date, self.test_account_id)
 
         self.assertEqual(response.status_code, 401)
+
+    def test_get_single_transactions(self):
+        create_single_transaction(
+            account=self.test_account,
+            name=self.test_trans_name,
+            date=self.test_trans_date,
+            amount=self.test_trans_amount
+        )
+        create_single_transaction(
+            account=self.test_account,
+            name=self.test_trans_name,
+            date=self.test_trans_date,
+            amount=self.test_trans_amount
+        )
+        response = self.get_single_transaction()
+
+        self.assertEqual(response.status_code, 200)
+        
+        transactions = json.loads(response.data)
+        self.assertEqual(len(transactions), 2)

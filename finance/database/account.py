@@ -53,19 +53,5 @@ def get_accounts(session: SessionLocal) -> List[Account]:
     return session.query(Account).all()
 
 
-def get_account_balance(account_id: int) -> float:
-    cnx = get_connection()
-
-    cursor = cnx.cursor()
-    sql = """
-    SELECT balance 
-    FROM account 
-    WHERE account_id=%d
-    """ % (account_id)
-    cursor.execute(sql)
-    result = cursor.fetchone()
-
-    cursor.close()
-    cnx.close()
-
-    return float(result[0])
+def get_user_account_by_id(account_id: str, user: User) -> Account:
+    return user.accounts.filter(Account.account_id == account_id).scalar()
