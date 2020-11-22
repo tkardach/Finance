@@ -33,7 +33,7 @@ class TestRouteAccount(unittest.TestCase):
             'balance': balance
         }
         return self.client.post(
-            '/create-account',
+            '/accounts',
             data=json.dumps(data),
             mimetype='application/json')
 

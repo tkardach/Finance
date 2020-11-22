@@ -9,8 +9,6 @@ from finance.shared import HTTPErrorResponse
 from finance.utility.logging import logger
 
 
-# TODO Test logging errors in app.errorhandler
-
 app = Flask(__name__)
 app.secret_key = Config.secret_key
 
@@ -26,10 +24,15 @@ app.register_blueprint(user_blueprint)
 from .account import account as account_blueprint
 app.register_blueprint(account_blueprint)
 
+from .transaction import transaction as transaction_blueprint
+app.register_blueprint(transaction_blueprint)
 
 @login_manager.user_loader
 def load_user(user_id):
     return get_user_by_id(app.session, user_id)
+
+
+# region Flask app session handling
 
 
 # App before request
@@ -51,10 +54,14 @@ def shutdown_session(response_or_exc):
 def catch_all_errors(error):
   logger.error(error)
   app.session.rollback()
-  return error
+  return HTTPErrorResponse.internal_server_error()
   
 # Error handling catch 401 sent from flask login_required
 @app.errorhandler(401)
 def catch_all_errors(error):
+  logger.error(error)
   app.session.rollback()
   return HTTPErrorResponse.unauthorized_user()
+
+
+# endregion

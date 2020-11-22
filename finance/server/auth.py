@@ -1,6 +1,5 @@
 from finance.database.user import get_user_by_email, create_user
 from finance.database.database import SessionLocal
-from finance.server import app
 from flask import request, jsonify, Response, Blueprint, current_app
 from flask_login import login_user, login_required, logout_user
 from finance.shared import HTTPErrorResponse, Validation

@@ -29,6 +29,11 @@ LOGGING_CONFIG = {
   'loggers': {
     '': {
       'level': 'DEBUG',
+      'handlers': ['console'],
+      'propogate': False
+    },
+    'production': {
+      'level': 'DEBUG',
       'handlers': ['console', 'exception'],
       'propogate': False
     },

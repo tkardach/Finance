@@ -4,6 +4,7 @@ from flask_login import current_user, login_required
 from finance.shared import HTTPErrorResponse, Validation, HTTPResponse
 from finance.utility.security import check_hashed_string
 from finance.database.models import Account, RecurringTransaction, SingleTransaction
+from finance.database.user import get_user_by_email
 import finance.database.account as acc
 
 
@@ -81,19 +82,11 @@ def account_to_dict(account: Account) -> dict:
     }
 
 
-@account.route('/accounts', methods=['GET'])
-@login_required
-def get_accounts():
-    dict_accounts = [account_to_dict(i) for i in current_user.accounts]
-
-    return HTTPResponse.return_json_response(dict_accounts, 200)
-
-
-@account.route('/create-account', methods=['POST'])
-@login_required
 def create_account():
+    """Create an account for the current_user
+    """
     session = current_app.session
-    
+
     # expecting json request body
     if not request.is_json:
         return HTTPErrorResponse.post_expects_json()
@@ -113,6 +106,19 @@ def create_account():
     if email is None:
         return HTTPErrorResponse.internal_server_error('Current user email could not be found')
 
-    account = acc.create_account(name=name, balance=balance, user=current_user)
+    # find user so we can control session (as oppose to using current_user)
+    user = get_user_by_email(session=session, email=email)
+    account = acc.create_account(name=name, balance=balance, user=user)
 
     return HTTPResponse.return_json_response(account_to_dict(account), 200)
+
+
+@account.route('/accounts', methods=['GET', 'POST'])
+@login_required
+def accounts():
+    if request.method == 'GET':
+        dict_accounts = [account_to_dict(i) for i in current_user.accounts]
+
+        return HTTPResponse.return_json_response(dict_accounts, 200)
+    elif request.method == 'POST':
+        return create_account()
