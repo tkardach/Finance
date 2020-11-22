@@ -136,11 +136,22 @@ class HTTPErrorResponse():
     def invalid_email(email: str):
         ret = {
           'error': 'Email parameter is invalid',
-          'message': "Email parameter '%s' is not a valid email address"
+          'message': "Email parameter '%s' is not a valid email address" % email
         }
         return HTTPResponse.return_json_response(ret, 400)
 
     
+    @staticmethod
+    def unauthorized_user():
+        ret = {
+          'error': '401 Unauthorized',
+          'message': "The server could not verify that you are authorized to access the URL requested. " +
+              "You either supplied the wrong credentials (e.g. a bad password), or your browser " + 
+              "doesn't understand how to supply the credentials required."
+        }
+        return HTTPResponse.return_json_response(ret, 401)
+    
+
     @staticmethod
     def internal_server_error(message: str = 'An unknown internal server error ocurred'):
         ret = {

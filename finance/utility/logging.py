@@ -1,5 +1,6 @@
 import logging
 import logging.config
+from .config import Config
 
 
 LOGGING_CONFIG = {
@@ -30,10 +31,17 @@ LOGGING_CONFIG = {
       'level': 'DEBUG',
       'handlers': ['console', 'exception'],
       'propogate': False
+    },
+    'test': {
+      'level': 'DEBUG',
+      'handlers': ['console'],
+      'propogate': False
     }
   }
 }
 
 logging.config.dictConfig(LOGGING_CONFIG)
 
-logger = logging.getLogger()
+logger_type = 'test' if Config.test_env else None
+
+logger = logging.getLogger(logger_type)
