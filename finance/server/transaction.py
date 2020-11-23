@@ -4,25 +4,30 @@ from finance.database.account import get_user_account_by_id
 from finance.database.database import SessionLocal
 from flask import request, jsonify, Response, Blueprint, current_app
 from flask_login import current_user, login_required
-from finance.shared import HTTPErrorResponse, Validation, HTTPResponse
-from finance.server.shared import single_transaction_to_dict
+from finance.shared import HTTPErrorResponse, Validation, HTTPResponse, Timespan
+from finance.server.shared import single_transaction_to_dict, recurring_transaction_to_dict
 from dateutil import parser
+from markupsafe import escape
 
 
 transaction = Blueprint('transaction', __name__)
 
+
+#region Single Transactions
 
 def create_single_transaction():
     # expecting json request body
     if not request.is_json:
         return HTTPErrorResponse.post_expects_json()
 
+    # get request body parameters
     request_json = request.get_json()
     account_id = request_json.get('account_id')
     name = request_json.get('name')
     amount = request_json.get('amount')
     post_date = request_json.get('date')
 
+    # get date from string
     date = None
     try:
         date = parser.parse(post_date)
@@ -32,11 +37,13 @@ def create_single_transaction():
         if err is OverflowError:
             return HTTPErrorResponse.invalid_parameter('date', "Date parameter caused OverflowError")
 
+    # get user account with ID for current user
     user_account = get_user_account_by_id(account_id, current_user)
 
     if user_account is None:
         return HTTPErrorResponse.not_found('User Account with account_id')
 
+    # create transaction
     new_transaction = transactions.create_single_transaction(
         account=user_account, name=name, date=date, amount=amount
     )
@@ -48,14 +55,97 @@ def create_single_transaction():
     return HTTPResponse.return_json_response(single_transaction_to_dict(new_transaction), 200)
 
 
-@transaction.route('/single-transaction', methods=['POST', 'GET'])
+@transaction.route('/single-transactions', methods=['POST'])
 @login_required
-def single_transactions():
-    if request.method == 'POST':
-        return create_single_transaction()
-    elif request.method == 'GET':
-        # TODO should have GET method be by account id, so we return only accounts transactions
-        dict_accounts = [single_transaction_to_dict(
-            i) for i in current_user.accounts]
+def create_single_transactions():
+    return create_single_transaction()
 
-        return HTTPResponse.return_json_response(dict_accounts, 200)
+
+@transaction.route('/single-transactions/<account_id>', methods=['GET'])
+@login_required
+def get_single_transactions(account_id: str):
+    # get user account with ID for current user
+    account = get_user_account_by_id(account_id=escape(account_id), user=current_user)
+
+    if account is None:
+        return HTTPErrorResponse.not_found('Account with id')
+
+    # create list of all single transactions in account as dict
+    dict_accounts = [single_transaction_to_dict(i) for i in account.single_transactions]
+
+    return HTTPResponse.return_json_response(dict_accounts, 200)
+
+
+#endregion
+
+#region Recurring Transactions
+
+
+def create_recurring_transaction():
+    # expecting json request body
+    if not request.is_json:
+        return HTTPErrorResponse.post_expects_json()
+
+    # get request body parameters
+    request_json = request.get_json()
+    account_id = request_json.get('account_id')
+    name = request_json.get('name')
+    amount = request_json.get('amount')
+    timespan_str = request_json.get('timespan')
+    post_date = request_json.get('start_date')
+
+    # get date from string
+    date = None
+    try:
+        date = parser.parse(post_date)
+    except Exception as err:
+        if err is ValueError:
+            return HTTPErrorResponse.invalid_parameter('start_date', "Invalid date format '%s'" % post_date)
+        if err is OverflowError:
+            return HTTPErrorResponse.invalid_parameter('start_date', "Date parameter caused OverflowError")
+
+    # check timespan
+    timespan = Timespan.get_timespan(timespan_str)
+    if timespan is None:
+        return HTTPErrorResponse.invalid_parameter('timespan', "'%s' is an invalid timespan format." % timespan)
+
+    # get user account with ID for current user
+    user_account = get_user_account_by_id(account_id, current_user)
+
+    if user_account is None:
+        return HTTPErrorResponse.not_found('User Account with account_id')
+
+    # create transaction
+    new_transaction = transactions.create_recurring_transaction(
+        account=user_account, name=name, start_date=date, amount=amount, timespan=timespan
+    )
+
+    if new_transaction is None:
+        HTTPErrorResponse.internal_server_error(
+            'Failed to create new recurring transaction')
+
+    return HTTPResponse.return_json_response(recurring_transaction_to_dict(new_transaction), 200)
+
+
+@transaction.route('/recurring-transactions', methods=['POST'])
+@login_required
+def create_recurring_transactions():
+    return create_recurring_transaction()
+
+
+@transaction.route('/recurring-transactions/<account_id>', methods=['GET'])
+@login_required
+def get_recurring_transactions(account_id: str):
+    # get user account with ID for current user
+    account = get_user_account_by_id(account_id=escape(account_id), user=current_user)
+
+    if account is None:
+        return HTTPErrorResponse.not_found('Account with id')
+
+    # create list of all recurring transactions in account as dict
+    dict_accounts = [recurring_transaction_to_dict(i) for i in account.recurring_transactions]
+
+    return HTTPResponse.return_json_response(dict_accounts, 200)
+
+
+#endregion
