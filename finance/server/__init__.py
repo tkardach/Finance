@@ -54,14 +54,7 @@ def shutdown_session(response_or_exc):
 def catch_all_errors(error):
   logger.error(error)
   app.session.rollback()
-  return HTTPErrorResponse.internal_server_error()
-  
-# Error handling catch 401 sent from flask login_required
-@app.errorhandler(401)
-def catch_all_errors(error):
-  logger.error(error)
-  app.session.rollback()
-  return HTTPErrorResponse.unauthorized_user()
+  return error
 
 
 # endregion
