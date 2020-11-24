@@ -4,6 +4,7 @@ import json
 from finance.database.database import SessionLocal
 from finance.database.models import User
 from finance.server import app
+from werkzeug.exceptions import InternalServerError
 
 
 @app.route('/test', methods=['GET'])

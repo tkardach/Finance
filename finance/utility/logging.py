@@ -30,23 +30,24 @@ LOGGING_CONFIG = {
     '': {
       'level': 'DEBUG',
       'handlers': ['console'],
-      'propogate': False
+      'propagate': False
     },
     'production': {
       'level': 'DEBUG',
       'handlers': ['console', 'exception'],
-      'propogate': False
+      'propagate': False
     },
     'test': {
       'level': 'DEBUG',
       'handlers': [],
-      'propogate': False
+      'propagate': False
     }
   }
 }
 
 logging.config.dictConfig(LOGGING_CONFIG)
 
-logger_type = 'test' if Config.test_env else None
+logger = logging.getLogger()
 
-logger = logging.getLogger(logger_type)
+if Config.test_env:
+    logger.disabled = True

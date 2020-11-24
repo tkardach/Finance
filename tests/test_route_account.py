@@ -115,6 +115,30 @@ class TestRouteAccount(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(accounts), 1)
 
+    def test_create_account_400_missing_name(self):
+        balance = 95.50
+
+        data = {
+            'balance': balance
+        }
+        return self.client.post(
+            '/accounts',
+            data=json.dumps(data),
+            mimetype='application/json')
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_account_400_missing_balance(self):
+        data = {
+            'name': 'test_name'
+        }
+        return self.client.post(
+            '/accounts',
+            data=json.dumps(data),
+            mimetype='application/json')
+
+        self.assertEqual(response.status_code, 400)
+
     def test_get_account(self):
         name = 'test_name'
         balance = 50.65
@@ -201,3 +225,14 @@ class TestRouteAccount(unittest.TestCase):
         second_balance = json.loads(response_second.data)
         self.assertEqual(first_balance['balance'], first_expected)
         self.assertEqual(second_balance['balance'], second_expected)
+
+    def test_get_account_balance_401_on_not_logged_in(self):
+        name = 'test_name'
+        balance = 50.65
+        account = self.create_account(name, balance)
+        today = date.today()
+
+        self.get_logout()
+        response = self.get_account_balance(account.account_id, today)
+
+        self.assertEqual(response.status_code, 401)

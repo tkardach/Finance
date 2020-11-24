@@ -86,22 +86,22 @@ class TestRouteAuth(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
 
-    def test_login_path_400_on_bad_password(self):
+    def test_login_path_401_on_bad_password(self):
         self.create_test_user()
         response = self.post_login(self.test_email, 'wrong')
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 401)
 
-    def test_login_path_400_on_wrong_email(self):
+    def test_login_path_401_on_wrong_email(self):
         self.create_test_user()
         response = self.post_login('not_in_db@email.com', self.test_pass)
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 401)
 
-    def test_login_path_400_on_no_user(self):
+    def test_login_path_401_on_no_user(self):
         response = self.post_login(self.test_email, self.test_pass)
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 401)
 
     def test_login_path_400_on_bad_mimetype(self):
         response = self.client.post(

@@ -11,30 +11,33 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['POST'])
 def login():
-    # expecting json request body
-    if not request.is_json:
-        return HTTPErrorResponse.post_expects_json()
-    
-    request_json = request.get_json()
-    email = request_json.get('email')
-    password = request_json.get('password')
+    # get the request parameters
+    email = None
+    password = None
+    if request.is_json:
+        request_json = request.get_json()
+        email = request_json.get('email')
+        password = request_json.get('password')
+    else:
+        email = request.form['email']
+        password = request.form['password']
 
     # make sure all parameters exist
     if email is None:
-        return HTTPErrorResponse.post_missing_parameters('email')
+        return HTTPErrorResponse.raise_missing_parameter('email')
     
     if password is None:
-        return HTTPErrorResponse.post_missing_parameters('password')
+        return HTTPErrorResponse.raise_missing_parameter('password')
 
     # make sure email is a valid email address
     if not Validation.validate_email(email):
-        return HTTPErrorResponse.invalid_email(email)
+        return HTTPErrorResponse.raise_invalid_email(email)
 
     # check for user in the database
     user = get_user_by_email(current_app.session, email)
 
     if not user or not check_hashed_string(password, user.password):
-        return HTTPErrorResponse.post_invalid_credentials()
+        return HTTPErrorResponse.raise_invalid_credentials()
 
     # login the user
     login_user(user, remember=True)
@@ -44,30 +47,33 @@ def login():
 
 @auth.route('/signup', methods=['POST'])
 def signup():
-    # expecting json request body
-    if not request.is_json:
-        return HTTPErrorResponse.post_expects_json()
-    
-    request_json = request.get_json()
-    email = request_json.get('email')
-    password = request_json.get('password')
+    # get the request parameters
+    email = None
+    password = None
+    if request.is_json:
+        request_json = request.get_json()
+        email = request_json.get('email')
+        password = request_json.get('password')
+    else:
+        email = request.form['email']
+        password = request.form['password']
 
     # make sure all parameters exist
     if email is None:
-        return HTTPErrorResponse.post_missing_parameters('email')
+        return HTTPErrorResponse.raise_missing_parameter('email')
     
     if password is None:
-        return HTTPErrorResponse.post_missing_parameters('password')
+        return HTTPErrorResponse.raise_missing_parameter('password')
 
     if not Validation.validate_email(email):
-        return HTTPErrorResponse.invalid_email(email)
+        return HTTPErrorResponse.raise_invalid_email(email)
 
     # make sure email is a valid email address
     user = get_user_by_email(current_app.session, email)
 
     # check for user is already in the database
     if user:
-        return HTTPErrorResponse.user_already_exists()
+        return HTTPErrorResponse.raise_user_already_exists()
 
     # create the user
     new_user = create_user(current_app.session, email, password)

@@ -1,7 +1,7 @@
 import json
 from flask import request, jsonify, Response, Blueprint, current_app
 from flask_login import current_user, login_required
-from finance.shared import HTTPErrorResponse, Validation, HTTPResponse
+from finance.shared import Validation, HTTPResponse
 from finance.utility.security import check_hashed_string
 
 

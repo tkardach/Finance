@@ -3,10 +3,12 @@ import json
 from typing import Union
 from datetime import date, timedelta
 from flask import Response
+from werkzeug.exceptions import (HTTPException, NotFound, InternalServerError, Forbidden,
+    Unauthorized, BadRequest)
 
 
 class Validation():
-    EMAIL_REG = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+    EMAIL_REG = r'[^@]+@[^@]+\.[^@]+'
 
 
     @staticmethod
@@ -97,87 +99,44 @@ class HTTPErrorResponse():
     __json_mime_type = 'application/json'
 
     @staticmethod
-    def post_missing_parameters(parameter: str):
-        ret = {
-          'error': 'Request body missing parameter',
-          'message': '%s parameter missing from request body' % parameter
-        }
-        return HTTPResponse.return_json_response(ret, 400)
+    def raise_missing_parameter(parameter: str):
+        raise BadRequest(description="'%s' missing from the body of the request." % parameter)
 
 
     @staticmethod
-    def post_invalid_credentials():
-        ret = {
-          'error': 'Invalid Credentials',
-          'message': 'Invalid email or password'
-        }
-        return HTTPResponse.return_json_response(ret, 400)
+    def raise_invalid_credentials():
+        raise Unauthorized(description="Invalid email or password.")
 
     
     @staticmethod
-    def post_expects_json():
-        ret = {
-          'error': 'POST request body invalid format',
-          'message': "POST request body expected to be 'application/json'"
-        }
-        return HTTPResponse.return_json_response(ret, 400)
+    def raise_user_already_exists():
+        raise BadRequest(description="A user with the given email already exists.")
 
     
     @staticmethod
-    def user_already_exists():
-        ret = {
-          'error': 'User already exists',
-          'message': "A user with the given email already exists"
-        }
-        return HTTPResponse.return_json_response(ret, 400)
+    def raise_invalid_email(email: str):
+        raise BadRequest(description="Email parameter '%s' is in an invalid email address format." % email)
 
     
     @staticmethod
-    def invalid_email(email: str):
-        ret = {
-          'error': 'Email parameter is invalid',
-          'message': "Email parameter '%s' is not a valid email address" % email
-        }
-        return HTTPResponse.return_json_response(ret, 400)
+    def raise_invalid_parameter(parameter: str, message: str="Parameter is invalid"):
+        raise BadRequest(description="%s : %s" % (parameter, message))
 
+    @staticmethod
+    def raise_unauthorized_user():
+        raise Unauthorized()
     
     @staticmethod
-    def invalid_parameter(parameter: str, message: str = 'Parameter is invalid'):
-        ret = {
-          'error': '400 Invalid Parameter',
-          'message': '%s: %s' % (parameter, message)
-        }
-        return HTTPResponse.return_json_response(ret, 400)
-
-    
-    @staticmethod
-    def unauthorized_user():
-        ret = {
-          'error': '401 Unauthorized',
-          'message': "The server could not verify that you are authorized to access the URL requested. " +
-              "You either supplied the wrong credentials (e.g. a bad password), or your browser " + 
-              "doesn't understand how to supply the credentials required."
-        }
-        return HTTPResponse.return_json_response(ret, 401)
+    def raise_internal_server_error(description=None):
+        if description is None:
+            raise InternalServerError()
+        else:
+            raise InternalServerError(description=description)
     
 
     @staticmethod
-    def internal_server_error(message: str = 'An unknown internal server error ocurred'):
-        ret = {
-          'error': 'Internal Server Error',
-          'message': '%s' % message
-        }
-        return HTTPResponse.return_json_response(ret, 500)
-    
-
-    @staticmethod
-    def not_found(item: str):
-        ret = {
-          'error': '404 Not Found',
-          'message': '%s could not be found.' % item
-        }
-        return HTTPResponse.return_json_response(ret, 404)
-
+    def raise_not_found(item: str):
+        raise NotFound("'%s' could not be found." % item)
 
 
 class HTTPResponse():

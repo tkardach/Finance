@@ -19,24 +19,28 @@ def create_account():
     """
     session = current_app.session
 
-    # expecting json request body
-    if not request.is_json:
-        return HTTPErrorResponse.post_expects_json()
-    
-    request_json = request.get_json()
-    name = request_json.get('name')
-    balance = request_json.get('balance')
+    name = None
+    balance = None
+    # get the request parameters
+    if request.is_json:
+        request_json = request.get_json()
+        name = request_json.get('name')
+        balance = request_json.get('balance')
+    else:
+        name = request.form['name']
+        balance = request.form['balance']
+
     email = current_user.email
 
     # make sure all parameters exist
     if name is None:
-        return HTTPErrorResponse.post_missing_parameters('name')
+        return HTTPErrorResponse.raise_missing_parameter('name')
     
     if balance is None:
-        return HTTPErrorResponse.post_missing_parameters('balance')
+        return HTTPErrorResponse.raise_missing_parameter('balance')
     
     if email is None:
-        return HTTPErrorResponse.internal_server_error('Current user email could not be found')
+        return HTTPErrorResponse.raise_internal_server_error()
 
     # find user so we can control session (as oppose to using current_user)
     user = get_user_by_email(session=session, email=email)
@@ -64,7 +68,7 @@ def get_account(account_id):
 
     # return 404 if not found
     if user_account is None:
-        return HTTPErrorResponse.not_found('Account with id')
+        return HTTPErrorResponse.raise_not_found('Account with id')
     
     # return account as dict
     return HTTPResponse.return_json_response(account_to_dict(user_account), 200)
@@ -78,16 +82,16 @@ def get_account_balance(account_id, date):
         date = parser.parse(date).date()
     except Exception as err:
         if err is ValueError:
-            return HTTPErrorResponse.invalid_parameter('date', "Invalid date format '%s'" % date)
+            return HTTPErrorResponse.raise_invalid_parameter('date', "Invalid date format '%s'" % date)
         if err is OverflowError:
-            return HTTPErrorResponse.invalid_parameter('date', "Date parameter caused OverflowError")
+            return HTTPErrorResponse.raise_invalid_parameter('date', "Date parameter caused OverflowError")
 
     # find the user account with the given id
     user_account = current_user.accounts.filter(Account.account_id==str(account_id)).scalar()
 
     # return 404 if not found
     if user_account is None:
-        return HTTPErrorResponse.not_found('Account with id')
+        return HTTPErrorResponse.raise_not_found('Account with id')
     
     # get the account balance on the given date
     balance = get_account_balance_on_date(user_account, date)

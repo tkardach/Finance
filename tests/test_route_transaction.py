@@ -152,6 +152,13 @@ class TestRouteTransaction(unittest.TestCase):
 
         self.assertEqual(response.status_code, 404)
 
+    def test_get_recurring_transactions_401_on_user_not_logged_in(self):
+        self.session.commit()
+        self.get_logout()
+        response = self.get_single_transaction(self.test_account_id)
+
+        self.assertEqual(response.status_code, 401)
+
     def test_create_recurring_transaction(self):
         response = self.post_create_recurring_transaction(
             self.test_trans_name, self.test_trans_amount, self.test_trans_date, 
@@ -195,7 +202,7 @@ class TestRouteTransaction(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
 
-    def test_get_single_transactions(self):
+    def test_get_recurring_transactions(self):
         create_recurring_transaction(
             account=self.test_account,
             name=self.test_trans_name, 
@@ -217,8 +224,15 @@ class TestRouteTransaction(unittest.TestCase):
         transactions = json.loads(response.data)
         self.assertEqual(len(transactions), 2)
 
-    def test_get_single_transactions_404_on_no_account(self):
+    def test_get_recurring_transactions_404_on_no_account(self):
         self.session.commit()
         response = self.get_recurring_transaction('does_not_exist')
 
         self.assertEqual(response.status_code, 404)
+
+    def test_get_recurring_transactions_401_on_user_not_logged_in(self):
+        self.session.commit()
+        self.get_logout()
+        response = self.get_recurring_transaction(self.test_account_id)
+
+        self.assertEqual(response.status_code, 401)

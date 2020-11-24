@@ -5,8 +5,8 @@ from finance.database.user import get_user_by_id
 from sqlalchemy.orm import scoped_session
 from flask import Flask, _app_ctx_stack
 from flask_login import LoginManager
-from finance.shared import HTTPErrorResponse
 from finance.utility.logging import logger
+from werkzeug.exceptions import HTTPException, InternalServerError
 
 
 app = Flask(__name__)
@@ -54,7 +54,9 @@ def shutdown_session(response_or_exc):
 def catch_all_errors(error):
   logger.error(error)
   app.session.rollback()
-  return error
+  if not isinstance(error, HTTPException):
+    return InternalServerError().get_response()
+  return error.get_response()
 
 
 # endregion
