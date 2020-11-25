@@ -3,7 +3,7 @@ import tests
 from finance.database.account import *
 from finance.database.user import *
 from finance.database.transactions import *
-from finance.database.models import Account, User, SingleTransaction
+from finance.database.models import Account, User, SingleTransaction, Role
 from finance.database.database import engine, SessionLocal
 from datetime import date, timedelta
 
@@ -34,6 +34,7 @@ class TestORMSingleTransactions(unittest.TestCase):
     def delete_all_rows(self):
         self.session.query(SingleTransaction).delete()
         self.session.query(Account).delete()
+        self.session.query(Role).delete()
         self.session.query(User).delete()
         self.session.commit()
 

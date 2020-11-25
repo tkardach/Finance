@@ -1,7 +1,7 @@
 import unittest
 import tests
 from finance.database.database import engine, SessionLocal
-from finance.database.models import Account, User
+from finance.database.models import Account, User, Role
 from finance.database.user import *
 from finance.database.account import *
 
@@ -16,6 +16,7 @@ class TestORMAccount(unittest.TestCase):
 
     def delete_all_rows(self):
         self.session.query(Account).delete()
+        self.session.query(Role).delete()
         self.session.query(User).delete()
         self.session.commit()
 

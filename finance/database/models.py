@@ -1,6 +1,6 @@
 from .database import Base
-from flask_login import UserMixin
-from sqlalchemy import Column, INT, VARCHAR, BOOLEAN, DECIMAL, ForeignKey, DATETIME, Index
+from flask_security import RoleMixin, UserMixin
+from sqlalchemy import Column, INT, VARCHAR, BOOLEAN, DECIMAL, ForeignKey, DATETIME, Index, Table
 from sqlalchemy.orm import relationship
 import finance.utility.security as sec
 import uuid
@@ -9,6 +9,11 @@ import uuid
 def generate_uuid():
    return str(uuid.uuid4())
 
+
+roles_users_table = Table('roles_users',
+    Base.metadata,
+    Column('user_id', VARCHAR(36), ForeignKey('users.user_id')),
+    Column('role_id', VARCHAR(36), ForeignKey('roles.role_id')))
 
 class User(UserMixin, Base):
     __tablename__ = 'users'
@@ -40,10 +45,29 @@ class User(UserMixin, Base):
     accounts = relationship('Account', 
         back_populates='user',
         lazy='dynamic')
+    
+    roles = relationship('Role', 
+        secondary=roles_users_table, 
+        back_populates='user', 
+        lazy=True)
 
     def __repr__(self):
         return "<User(email='%s', is_admin='%s')>" % (self.email, self.is_admin)
 
+class Role(RoleMixin, Base):
+    __tablename__ = 'roles'
+    role_id = Column(
+        VARCHAR(36),
+        primary_key=True,
+        nullable=False,
+        index=True,
+        default=generate_uuid)
+    name = Column(VARCHAR(80), unique=True)
+    description = Column(VARCHAR(255))
+    user = relationship('User', 
+        secondary=roles_users_table, 
+        back_populates='roles', 
+        lazy=True)
 
 class Account(Base):
     __tablename__ = 'accounts'

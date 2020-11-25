@@ -6,7 +6,7 @@ from finance.server import app
 from finance.database.user import create_user
 from finance.database.account import create_account
 from finance.database.transactions import create_recurring_transaction, create_single_transaction
-from finance.database.models import User, Account, SingleTransaction, RecurringTransaction
+from finance.database.models import User, Account, SingleTransaction, RecurringTransaction, Role
 from finance.shared import Timespan
 from datetime import date, timedelta
 from uuid import uuid4
@@ -65,6 +65,7 @@ class TestRouteAccount(unittest.TestCase):
         self.session.query(SingleTransaction).delete()
         self.session.query(RecurringTransaction).delete()
         self.session.query(Account).delete()
+        self.session.query(Role).delete()
         self.session.query(User).delete()
         self.session.commit()
 
@@ -82,8 +83,9 @@ class TestRouteAccount(unittest.TestCase):
     def test_get_accounts_empty(self):
         response = self.get_accounts()
 
-        accounts = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
+
+        accounts = json.loads(response.data)
         self.assertEqual(len(accounts), 0)
 
     def test_get_accounts(self):
@@ -92,9 +94,10 @@ class TestRouteAccount(unittest.TestCase):
         self.create_account(account_name, balance)
 
         response = self.get_accounts()
+        
+        self.assertEqual(response.status_code, 200)
 
         accounts = json.loads(response.data)
-        self.assertEqual(response.status_code, 200)
         self.assertEqual(len(accounts), 1)
 
     def test_create_account(self):
@@ -111,8 +114,9 @@ class TestRouteAccount(unittest.TestCase):
 
         response = self.get_accounts()
 
-        accounts = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
+        
+        accounts = json.loads(response.data)
         self.assertEqual(len(accounts), 1)
 
     def test_create_account_400_missing_name(self):

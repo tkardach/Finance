@@ -3,7 +3,7 @@ import tests
 from finance.database.account import *
 from finance.database.user import *
 from finance.database.transactions import *
-from finance.database.models import Account, User, RecurringTransaction, SingleTransaction
+from finance.database.models import Account, User, RecurringTransaction, SingleTransaction, Role
 from finance.database.database import engine, SessionLocal
 from datetime import date
 from dateutil.relativedelta import relativedelta
@@ -43,6 +43,7 @@ class TestORMTransactions(unittest.TestCase):
         self.session.query(SingleTransaction).delete()
         self.session.query(RecurringTransaction).delete()
         self.session.query(Account).delete()
+        self.session.query(Role).delete()
         self.session.query(User).delete()
         self.session.commit()
 

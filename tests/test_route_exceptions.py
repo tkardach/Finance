@@ -2,7 +2,7 @@ import unittest
 import tests
 import json
 from finance.database.database import SessionLocal
-from finance.database.models import User
+from finance.database.models import User, Role
 from finance.server import app
 from werkzeug.exceptions import InternalServerError
 
@@ -19,6 +19,7 @@ class TestRouteExceptions(unittest.TestCase):
         return self.client.get('/test')
   
     def delete_all_rows(self):
+        self.session.query(Role).delete()
         self.session.query(User).delete()
         self.session.commit()
 

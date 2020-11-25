@@ -4,7 +4,7 @@ import json
 from finance.database.database import SessionLocal
 from finance.server import app
 from finance.database.user import create_user
-from finance.database.models import User
+from finance.database.models import User, Role
 
 
 class TestRouteAuth(unittest.TestCase):
@@ -13,35 +13,46 @@ class TestRouteAuth(unittest.TestCase):
     test_user = None
     session = None
 
-    def create_test_user(self):
-        self.test_user = create_user(
-            session=self.session, email=self.test_email, password=self.test_pass)
-        self.session.commit()
+    # def create_test_user(self):
+    #     self.test_user = create_user(
+    #         session=self.session, email=self.test_email, password=self.test_pass)
+    #     self.session.commit()
 
-    def post_login(self, email: str, password: str):
-        test_login = {
-            'email': email,
-            'password': password
-        }
-        return self.client.post(
-            '/login',
-            data=json.dumps(test_login),
-            content_type='application/json')
+    # def post_login(self, email: str, password: str):
+    #     test_login = {
+    #         'email': email,
+    #         'password': password
+    #     }
+    #     return self.client.post(
+    #         '/login',
+    #         data=json.dumps(test_login),
+    #         content_type='application/json')
 
-    def get_logout(self):
-        return self.client.get('/logout')
+    # def get_logout(self):
+    #     return self.client.get('/logout')
 
-    def post_signup(self, email: str, password: str):
-        test_signup = {
-            'email': email,
-            'password': password
-        }
-        return self.client.post(
-            '/signup',
-            data=json.dumps(test_signup),
-            content_type='application/json')
+    # def post_signup(self, email: str, password: str):
+    #     test_signup = {
+    #         'email': email,
+    #         'password': password
+    #     }
+    #     return self.client.post(
+    #         '/signup',
+    #         data=json.dumps(test_signup),
+    #         content_type='application/json')
+
+    # def post_signup(self, email: str, password: str):
+    #     test_signup = {
+    #         'email': email,
+    #         'password': password
+    #     }
+    #     return self.client.post(
+    #         '/signup',
+    #         data=json.dumps(test_signup),
+    #         content_type='application/json')
 
     def delete_all_rows(self):
+        self.session.query(Role).delete()
         self.session.query(User).delete()
         self.session.commit()
 

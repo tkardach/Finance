@@ -4,7 +4,7 @@ import json
 from finance.database.database import SessionLocal
 from finance.server import app
 from finance.database.user import create_user
-from finance.database.models import User
+from finance.database.models import User, Role
 
 
 class TestRouteUser(unittest.TestCase):
@@ -35,6 +35,7 @@ class TestRouteUser(unittest.TestCase):
         return self.client.get('/profile')
 
     def delete_all_rows(self):
+        self.session.query(Role).delete()
         self.session.query(User).delete()
         self.session.commit()
 

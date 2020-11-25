@@ -1,18 +1,27 @@
 from finance.utility.config import Config
 from finance.database.database import SessionLocal
-from finance.database.models import User
+from finance.database.models import User, Role
 from finance.database.user import get_user_by_id
 from sqlalchemy.orm import scoped_session
 from flask import Flask, _app_ctx_stack
 from flask_login import LoginManager
+from flask_security import Security, UserDatastore
+from flask_wtf import CSRFProtect
 from finance.utility.logging import logger
 from werkzeug.exceptions import HTTPException, InternalServerError
 
 
 app = Flask(__name__)
-app.secret_key = Config.secret_key
+
+app.config['SECRET_KEY'] = Config.secret_key
+app.config['SECURITY_RECOVERABLE'] = True
+app.config['SECURITY_REGISTERABLE'] = True
+app.config['WTF_CSRF_ENABLED'] = False if Config.test_env else True
+
+user_datastore = UserDatastore(User, Role)
 
 login_manager = LoginManager(app)
+security = Security(app, user_datastore)
 
 # Initialize routes
 from .auth import auth as auth_blueprint
@@ -33,7 +42,6 @@ def load_user(user_id):
 
 
 # region Flask app session handling
-
 
 # App before request
 # Setup scoped session

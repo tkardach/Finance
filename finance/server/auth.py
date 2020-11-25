@@ -2,6 +2,7 @@ from finance.database.user import get_user_by_email, create_user
 from finance.database.database import SessionLocal
 from flask import request, jsonify, Response, Blueprint, current_app
 from flask_login import login_user, login_required, logout_user
+from flask_security.recoverable import send_reset_password_instructions
 from finance.shared import HTTPErrorResponse, Validation
 from finance.utility.security import check_hashed_string
 

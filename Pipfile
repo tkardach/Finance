@@ -14,6 +14,8 @@ flask = "*"
 flask-login = "*"
 py-bcrypt = "*"
 sqlalchemy = "*"
+email-validator = "*"
+flask-security-too = "*"
 
 [requires]
 python_version = "3.8"

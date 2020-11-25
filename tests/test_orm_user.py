@@ -2,7 +2,7 @@ import unittest
 import tests
 from finance.database.database import engine, SessionLocal
 from finance.utility.security import *
-from finance.database.models import User
+from finance.database.models import User, Role
 from finance.database.user import *
 
 class TestORMUser(unittest.TestCase):
@@ -13,6 +13,7 @@ class TestORMUser(unittest.TestCase):
   test_password = 'mytestpassword'
 
   def delete_all_rows(self):
+    self.session.query(Role).delete()
     self.session.query(User).delete()
     self.session.commit()
 

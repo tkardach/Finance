@@ -6,7 +6,7 @@ from finance.database.database import SessionLocal
 from finance.server import app
 from finance.database.user import create_user
 from finance.database.account import create_account
-from finance.database.models import User, Account, SingleTransaction, RecurringTransaction
+from finance.database.models import User, Account, SingleTransaction, RecurringTransaction, Role
 from finance.database.transactions import create_single_transaction, create_recurring_transaction
 from finance.shared import Timespan
 from dateutil import parser
@@ -86,6 +86,7 @@ class TestRouteTransaction(unittest.TestCase):
         self.session.query(RecurringTransaction).delete()
         self.session.query(SingleTransaction).delete()
         self.session.query(Account).delete()
+        self.session.query(Role).delete()
         self.session.query(User).delete()
         self.session.commit()
 
